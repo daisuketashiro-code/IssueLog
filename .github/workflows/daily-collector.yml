@@ -1,0 +1,56 @@
+name: Daily case collector
+
+on:
+  schedule:
+    # 15:00 UTC = 0:00 JST
+    - cron: "0 15 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Require OpenAI key
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          if [ -z "$OPENAI_API_KEY" ]; then
+            echo "Repository secret OPENAI_API_KEY を設定してください。"
+            exit 1
+          fi
+
+      - name: Prepare database
+        run: npx prisma db push
+        env:
+          DATABASE_URL: file:./dev.db
+
+      - name: Collect from allowed RSS feeds
+        run: npm run collect
+        env:
+          DATABASE_URL: file:./dev.db
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: gpt-4o-mini
+          COLLECT_LIMIT: "12"
+
+      - name: Commit database updates
+        run: |
+          git add -f prisma/dev.db
+          if git diff --cached --quiet; then
+            echo "新しい保存はありません。"
+          else
+            git -c user.name="Kadai Map Bot" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -m "日次の事例収集結果を課題データへ反映する"
+            git push
+          fi

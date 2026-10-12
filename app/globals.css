@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+@theme {
+  --color-paper: #f3efe4;
+  --color-paper-deep: #e6dece;
+  --color-ink: #1c1914;
+  --color-muted: #5f584e;
+  --color-line: #d8d0c3;
+  --color-green: #1c6b45;
+  --color-green-soft: #e3f2e8;
+  --color-clay: #b8431a;
+  --color-clay-soft: #f8ece4;
+  --color-fail: #8d3b34;
+  --color-fail-soft: #f7e7e4;
+  --font-sans: var(--font-gothic), "Yu Gothic UI", "Yu Gothic", sans-serif;
+  --font-serif: var(--font-mincho), "Yu Mincho", serif;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+  }
+
+  ::selection {
+    background: #efd0c2;
+  }
+}

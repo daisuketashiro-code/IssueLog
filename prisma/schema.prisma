@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id          String  @id
+  slug        String  @unique
+  name        String
+  description String
+  sortOrder   Int
+  issues      Issue[]
+}
+
+model Issue {
+  id          String               @id
+  slug        String               @unique
+  title       String
+  description String
+  keywords    String               @default("")
+  sortOrder   Int                  @default(0)
+  categoryId  String
+  category    Category             @relation(fields: [categoryId], references: [id])
+  solutions   Solution[]
+  cases       Case[]
+  models      IssueBusinessModel[]
+}
+
+model Solution {
+  id          String @id
+  issueId     String
+  title       String
+  description String
+  sortOrder   Int    @default(0)
+  issue       Issue  @relation(fields: [issueId], references: [id], onDelete: Cascade)
+}
+
+model BusinessModel {
+  id         String               @id
+  slug       String               @unique
+  name       String
+  summary    String
+  components String
+  worksWhen  String
+  failsWhen  String
+  sortOrder  Int                  @default(0)
+  issues     IssueBusinessModel[]
+  cases      Case[]
+}
+
+model IssueBusinessModel {
+  issueId         String
+  businessModelId String
+  issue           Issue         @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  businessModel   BusinessModel @relation(fields: [businessModelId], references: [id], onDelete: Cascade)
+
+  @@id([issueId, businessModelId])
+}
+
+model Case {
+  id              String         @id @default(cuid())
+  title           String
+  summary         String
+  outcome         String
+  tags            String         @default("[]")
+  sourceName      String
+  sourceUrl       String
+  sourceType      String
+  sourceUrlHash   String         @unique
+  publishedAt     DateTime?
+  issueId         String?
+  issue           Issue?         @relation(fields: [issueId], references: [id], onDelete: SetNull)
+  businessModelId String?
+  businessModel   BusinessModel? @relation(fields: [businessModelId], references: [id], onDelete: SetNull)
+  createdAt       DateTime       @default(now())
+
+  @@index([publishedAt])
+  @@index([outcome])
+  @@index([issueId])
+  @@index([businessModelId])
+}
+
+model Inquiry {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  message   String
+  createdAt DateTime @default(now())
+}
