@@ -1,9 +1,14 @@
 name: Daily case collector
 
+# 日次の自動実行は停止中。コードと手動実行はそのまま残してある。
+# 再開するときは、下の schedule のコメントを外し、vercel.json の crons も戻す。
+#   schedule:
+#     - cron: "0 15 * * *" # 15:00 UTC = 0:00 JST
+#     - cron: "0 3 * * *"  # 03:00 UTC = 12:00 JST。バッチ結果の保存
+#   vercel.json:
+#     { "path": "/api/cron/collect", "schedule": "0 15 * * *" }
+#     { "path": "/api/cron/collect", "schedule": "0 3 * * *" }
 on:
-  schedule:
-    # 15:00 UTC = 0:00 JST
-    - cron: "0 15 * * *"
   workflow_dispatch:
 
 permissions:
